@@ -19,7 +19,7 @@ A full-stack internal work and task tracking application built for software team
 ### Prerequisites
 
 | Tool | Version |
-|---|---|
+| --- | --- |
 | Python | 3.11+ |
 | Node.js | 20+ |
 | Docker + Docker Compose | 24+ (optional) |
@@ -62,7 +62,7 @@ Start the backend (hot reload):
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Backend is live at **http://localhost:8000**. Interactive API docs at **http://localhost:8000/docs**.
+Backend is live at <http://localhost:8000>. Interactive API docs at <http://localhost:8000/docs>.
 
 #### 3. Frontend setup
 
@@ -72,7 +72,7 @@ npm install
 npm run dev
 ```
 
-Frontend is live at **http://localhost:3000**.
+Frontend is live at <http://localhost:3000>.
 
 ---
 
@@ -83,10 +83,10 @@ docker compose up --build
 ```
 
 | Service | URL |
-|---|---|
-| Frontend | http://localhost:3000 |
-| Backend API | http://localhost:8000 |
-| API Docs | http://localhost:8000/docs |
+| --- | --- |
+| Frontend | <http://localhost:3000> |
+| Backend API | <http://localhost:8000> |
+| API Docs | <http://localhost:8000/docs> |
 
 The database is persisted in a named Docker volume (`backend_db`). Your data survives container restarts.
 
@@ -126,7 +126,7 @@ Expected results: **22 backend tests**, **85 frontend tests** — all passing.
 Four-column kanban view for task lifecycle management:
 
 | Column | Status value | Purpose |
-|---|---|---|
+| --- | --- | --- |
 | To Be Classified | `to_be_classified` | Inbox for new/unsorted tasks |
 | Current Focus | `current` | Active work this sprint |
 | Upcoming | `upcoming` | Planned but not started |
@@ -172,7 +172,7 @@ Four-column kanban view for task lifecycle management:
 Three analytics views:
 
 | View | What it shows |
-|---|---|
+| --- | --- |
 | Burndown | Per-sprint: total estimate vs. spent vs. remaining minutes, task counts, completion % |
 | Velocity | Per-sprint: completed task count and total hours logged |
 | Accuracy | Per-user: average estimated minutes vs. average actual minutes across completed tasks |
@@ -210,7 +210,7 @@ Three analytics views:
 **Notifications endpoint** returns actionable alerts:
 
 | Type | Trigger |
-|---|---|
+| --- | --- |
 | `overdue` | Task with past due date, not done |
 | `due_soon` | Task due within 3 days |
 | `stale` | Task whose next-update date has passed |
@@ -225,7 +225,7 @@ Requires `GOOGLE_API_KEY` in `.env`. Powered by `gemini-2.5-flash` with automati
 **Available tools the agent can call:**
 
 | Tool | What it does |
-|---|---|
+| --- | --- |
 | `create_task` | Creates a new task with title, status, description, priority |
 | `update_task` | Updates status, assignee, sprint, or priority on an existing task |
 | `add_task_update` | Appends a progress note to a task |
@@ -251,7 +251,7 @@ When `GOOGLE_API_KEY` is not set, both endpoints respond in mock mode without er
 ### System Requirements
 
 | Component | Requirement |
-|---|---|
+| --- | --- |
 | OS | macOS, Linux, or Windows (WSL2 recommended) |
 | Python | 3.11 or higher |
 | Node.js | 20 or higher |
@@ -262,7 +262,7 @@ When `GOOGLE_API_KEY` is not set, both endpoints respond in mock mode without er
 ### Backend Dependencies
 
 | Package | Version | Purpose |
-|---|---|---|
+| --- | --- | --- |
 | fastapi | latest | REST API framework |
 | uvicorn | latest | ASGI server |
 | duckdb | 1.4.0 | Embedded analytical database |
@@ -276,7 +276,7 @@ When `GOOGLE_API_KEY` is not set, both endpoints respond in mock mode without er
 ### Frontend Dependencies
 
 | Package | Version | Purpose |
-|---|---|---|
+| --- | --- | --- |
 | next | 16.1.6 | React framework (SSR + client routing) |
 | react / react-dom | 19.2.3 | UI library |
 | prismjs | ^1.30.0 | Syntax highlighting in code blocks |
@@ -287,7 +287,7 @@ When `GOOGLE_API_KEY` is not set, both endpoints respond in mock mode without er
 ### Environment Variables
 
 | Variable | Required | Description |
-|---|---|---|
+| --- | --- | --- |
 | `GOOGLE_API_KEY` | No | Enables Gemini AI Agent. Without it, AI routes work in mock mode |
 | `DB_PATH` | No | Path to the DuckDB file. Defaults to `work_tracker.duckdb` in the working directory. Set automatically by Docker Compose to `/app/data/work_tracker.duckdb` |
 | `NEXT_PUBLIC_API_URL` | No | Browser-facing API base URL. Defaults to `http://localhost:8000` |
@@ -297,87 +297,85 @@ When `GOOGLE_API_KEY` is not set, both endpoints respond in mock mode without er
 
 ## High Level Design
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                          Browser                                 │
-│                                                                  │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │               Next.js Frontend  (port 3000)              │   │
-│  │                                                          │   │
-│  │  page.tsx (Server Component — SSR initial data fetch)    │   │
-│  │       │                                                  │   │
-│  │  DashboardClient.tsx (Client Component — all interactivity)  │
-│  │       │                                                  │   │
-│  │  ┌────┴─────────────────────────────────────────────┐   │   │
-│  │  │  Tab Components                                   │   │   │
-│  │  │  CalendarView │ CapacityPlanningView │ InsightsView│   │   │
-│  │  │  TeamManagementView │ NotesView │ AIAgentView     │   │   │
-│  │  └────────────────────────────────────────────────────┘  │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│                         │  fetch() / REST                        │
-└─────────────────────────┼───────────────────────────────────────┘
-                          │  HTTP (port 8000)
-┌─────────────────────────┼───────────────────────────────────────┐
-│                FastAPI Backend  (port 8000)                       │
-│                                                                  │
-│   main.py ──► CORS middleware ──► router (routes.py)            │
-│                                        │                        │
-│              ┌─────────────────────────┤                        │
-│              │                         │                        │
-│         AIAgent                  get_db() (DuckDB connection)   │
-│    (ai_agent.py)                        │                        │
-│    Gemini 2.5 Flash               database.py                   │
-│    + function calling                   │                        │
-│                                         ▼                        │
-│                              work_tracker.duckdb                 │
-│                            (single embedded DB file)             │
-└──────────────────────────────────────────────────────────────────┘
+### System Architecture
+
+```mermaid
+flowchart TD
+    Browser(["Browser"])
+
+    subgraph FE["Next.js Frontend · port 3000"]
+        page["page.tsx\nServer Component\nSSR initial data fetch"]
+        client["DashboardClient.tsx\nClient Component\ntab state · drag-and-drop · CRUD"]
+        tabs["Tab Components\nCalendarView · CapacityPlanningView · InsightsView\nTeamManagementView · NotesView · AIAgentView"]
+        page --> client --> tabs
+    end
+
+    subgraph BE["FastAPI Backend · port 8000"]
+        main["main.py\nCORS Middleware · startup hook"]
+        router["routes.py\nAPI Router · 40+ endpoints"]
+        ai["ai_agent.py\nGemini 2.5 Flash\nautomated function calling"]
+        dbmod["database.py\nget_db() generator\ninit_db() migrations"]
+        duckdb[("work_tracker.duckdb\nsingle embedded DB file")]
+
+        main --> router
+        router --> ai
+        router --> dbmod --> duckdb
+    end
+
+    Browser <-->|"page load / interactions"| FE
+    FE -->|"HTTP REST · port 8000"| BE
 ```
 
 ### Request Flow
 
-```
-Browser                  Next.js (SSR)          FastAPI          DuckDB
-   │                          │                     │               │
-   │── page load ────────────►│                     │               │
-   │                          │── fetch /tasks ────►│               │
-   │                          │                     │── SQL query ──►│
-   │                          │                     │◄── rows ───────│
-   │                          │◄── JSON ────────────│               │
-   │◄── HTML (hydrated) ──────│                     │               │
-   │                          │                     │               │
-   │── user action ──────────────────────────────── fetch() ───────►│
-   │                                                │── SQL ────────►│
-   │                                                │◄── result ─────│
-   │◄────────────────────────── JSON response ──────│               │
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant N as Next.js SSR
+    participant F as FastAPI
+    participant D as DuckDB
+
+    rect rgb(30, 40, 60)
+        note over B,D: Initial page load (SSR)
+        B->>N: GET /
+        N->>F: fetch /tasks, /users, /team-focus (INTERNAL_API_URL)
+        F->>D: SQL SELECT
+        D-->>F: rows
+        F-->>N: JSON
+        N-->>B: hydrated HTML + React state
+    end
+
+    rect rgb(30, 60, 40)
+        note over B,D: Client-side interactions
+        B->>F: fetch() PUT/POST/DELETE (CLIENT_API_URL)
+        F->>D: SQL write + optional re-query
+        D-->>F: result rows
+        F-->>B: JSON response
+        B->>B: update local React state
+    end
 ```
 
 ### Docker Compose Topology
 
-```
-┌─────────────────────────────────────────────────┐
-│  Docker Network                                  │
-│                                                  │
-│  ┌─────────────┐      ┌──────────────────────┐  │
-│  │  frontend   │─────►│  backend             │  │
-│  │  :3000      │      │  :8000               │  │
-│  │             │      │                      │  │
-│  │ INTERNAL_   │      │  DB_PATH=            │  │
-│  │ API_URL=    │      │  /app/data/          │  │
-│  │ http://     │      │  work_tracker.duckdb │  │
-│  │ backend:8000│      │        │             │  │
-│  └─────────────┘      └────────┼─────────────┘  │
-│                                │                 │
-│                       ┌────────▼─────────┐       │
-│                       │  backend_db      │       │
-│                       │  (named volume)  │       │
-│                       └──────────────────┘       │
-│                                                  │
-│  ┌──────────────────────────┐                   │
-│  │  backend-test (profile)  │ docker compose    │
-│  │  pytest tests/ -v        │ --profile test    │
-│  └──────────────────────────┘                   │
-└─────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Host["Host Machine"]
+        HostBrowser(["Browser\nlocalhost:3000\nlocalhost:8000"])
+    end
+
+    subgraph Docker["Docker Network"]
+        FE["frontend\nport 3000\nNEXT_PUBLIC_API_URL=http://localhost:8000\nINTERNAL_API_URL=http://backend:8000"]
+        BE["backend\nport 8000\nDB_PATH=/app/data/work_tracker.duckdb"]
+        VOL[("backend_db\nnamed volume\n/app/data/")]
+        TEST["backend-test\nprofile: test\npytest tests/ -v"]
+
+        FE -->|"http://backend:8000 · SSR only"| BE
+        BE -->|"read / write"| VOL
+        TEST -->|"in-memory DuckDB\nno volume needed"| TEST
+    end
+
+    HostBrowser -->|"port 3000"| FE
+    HostBrowser -->|"port 8000"| BE
 ```
 
 ---
@@ -388,74 +386,102 @@ Browser                  Next.js (SSR)          FastAPI          DuckDB
 
 All tables live in a single DuckDB file (`work_tracker.duckdb`).
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│ users                                                         │
-│ ─────                                                         │
-│ id VARCHAR PK                                                 │
-│ name VARCHAR                                                  │
-│ role VARCHAR                                                  │
-│ is_active BOOLEAN DEFAULT TRUE                                │
-│ capacity_hours_per_sprint INTEGER DEFAULT 60                  │
-└──────────────────────────────────────────────────────────────┘
-         │ 1
-         │ * (user_id)
-┌──────────────────────────────────────────────────────────────┐
-│ tasks                                                         │
-│ ─────                                                         │
-│ id VARCHAR PK                                                 │
-│ title VARCHAR                                                 │
-│ description TEXT                                              │
-│ status VARCHAR  ← 'to_be_classified' | 'current' |           │
-│                   'upcoming' | 'long-term' | 'done'           │
-│ user_id VARCHAR FK→users.id                                   │
-│ week VARCHAR    ← YYYY-MM-DD of week start (Wednesday)        │
-│ sprint VARCHAR  ← e.g. '2026-Q1-S6-20260311'                 │
-│ priority VARCHAR DEFAULT 'p2'  ← 'p1' | 'p2' | 'p3'         │
-│ due_date TIMESTAMP                                            │
-│ next_update_date TIMESTAMP                                    │
-│ feedback VARCHAR                                              │
-│ time_estimate_mins INTEGER                                    │
-│ time_spent_mins INTEGER DEFAULT 0                             │
-│ recurrence_rule VARCHAR  ← 'daily' | 'weekly' | 'biweekly'   │
-└──────────────────────────────────────────────────────────────┘
-    │ 1           │ 1           │ 1           │ 1
-    │ *           │ *           │ *           │ *
-┌───────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐
-│task_updates│ │task_     │ │task_slots│ │task_notes        │
-│────────── │ │activity  │ │────────  │ │──────────────    │
-│id PK       │ │──────────│ │id PK     │ │id PK             │
-│task_id FK  │ │id PK     │ │task_id FK│ │task_id FK        │
-│update_text │ │task_id FK│ │user_id FK│ │title VARCHAR     │
-│created_at  │ │action    │ │start_time│ │content TEXT      │
-└───────────┘ │description│ │end_time  │ │is_published BOOL │
-              │created_at │ │created_at│ │created_at        │
-              └──────────┘ └──────────┘ │updated_at        │
-                                        └──────────────────┘
+```mermaid
+erDiagram
+    users {
+        VARCHAR id PK
+        VARCHAR name
+        VARCHAR role
+        BOOLEAN is_active
+        INTEGER capacity_hours_per_sprint
+    }
 
-┌──────────────────────────────┐   ┌──────────────────────────┐
-│ task_dependencies            │   │ retrospectives            │
-│ ─────────────────            │   │ ──────────────            │
-│ id PK                        │   │ id PK                     │
-│ blocker_task_id FK→tasks.id  │   │ sprint_id VARCHAR UNIQUE  │
-│ blocked_task_id FK→tasks.id  │   │ went_well TEXT            │
-│ created_at                   │   │ to_improve TEXT           │
-└──────────────────────────────┘   │ action_items TEXT         │
-                                   │ created_at                │
-                                   └──────────────────────────┘
+    tasks {
+        VARCHAR id PK
+        VARCHAR title
+        TEXT description
+        VARCHAR status
+        VARCHAR user_id FK
+        VARCHAR week
+        VARCHAR sprint
+        VARCHAR priority
+        TIMESTAMP due_date
+        TIMESTAMP next_update_date
+        VARCHAR feedback
+        INTEGER time_estimate_mins
+        INTEGER time_spent_mins
+        VARCHAR recurrence_rule
+    }
+
+    task_updates {
+        VARCHAR id PK
+        VARCHAR task_id FK
+        TEXT update_text
+        TIMESTAMP created_at
+    }
+
+    task_activity {
+        VARCHAR id PK
+        VARCHAR task_id FK
+        VARCHAR action
+        TEXT description
+        TIMESTAMP created_at
+    }
+
+    task_slots {
+        VARCHAR id PK
+        VARCHAR task_id FK
+        VARCHAR user_id FK
+        TIMESTAMP start_time
+        TIMESTAMP end_time
+        TIMESTAMP created_at
+    }
+
+    task_notes {
+        VARCHAR id PK
+        VARCHAR task_id FK
+        VARCHAR title
+        TEXT content
+        BOOLEAN is_published
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    task_dependencies {
+        VARCHAR id PK
+        VARCHAR blocker_task_id FK
+        VARCHAR blocked_task_id FK
+        TIMESTAMP created_at
+    }
+
+    retrospectives {
+        VARCHAR id PK
+        VARCHAR sprint_id
+        TEXT went_well
+        TEXT to_improve
+        TEXT action_items
+        TIMESTAMP created_at
+    }
+
+    users ||--o{ tasks : "assigned"
+    users ||--o{ task_slots : "owns"
+    tasks ||--o{ task_updates : "has"
+    tasks ||--o{ task_activity : "logs"
+    tasks ||--o{ task_slots : "scheduled in"
+    tasks ||--o{ task_notes : "has"
+    tasks ||--o{ task_dependencies : "blocks"
+    tasks ||--o{ task_dependencies : "blocked by"
 ```
 
 ### Sprint ID Format
 
 ```
-{YYYY}-Q{quarter}-S{sprint_number}-{YYYYMMDD}
-   │        │           │               │
-   │        │           │               └── Wednesday start date of sprint
-   │        │           └── sequential sprint number within the year
-   │        └── ISO quarter (1–4)
-   └── year
-
-Example: 2026-Q1-S6-20260311
+2026-Q1-S6-20260311
+  │    │  │    │
+  │    │  │    └── YYYYMMDD — Wednesday start date of the sprint
+  │    │  └─────── S{n}     — sequential sprint number within the year
+  │    └────────── Q{1-4}   — ISO calendar quarter
+  └─────────────── YYYY     — year
 ```
 
 Week starts on **Wednesday**. A sprint is **2 weeks**. Productive capacity defaults to **60 hours per sprint** (6h/day × 10 days).
@@ -466,14 +492,13 @@ Week starts on **Wednesday**. A sprint is **2 weeks**. Productive capacity defau
 backend/
 ├── main.py          # FastAPI app, CORS middleware, startup hook
 ├── database.py      # DuckDB connection factory (get_db generator),
-│                    # init_db (schema creation + migrations), seed user
+│                    # init_db (schema creation + column migrations), seed user
 ├── models.py        # Pydantic models: Task, User, TaskSlot, TaskNote,
 │                    # Retrospective, TaskDependency, TimeSpentUpdate
 ├── routes.py        # All API route handlers (750+ lines)
-│                    # Includes: log_activity() helper,
-│                    #           _create_recurring_next() helper
+│                    # Helpers: log_activity(), _create_recurring_next()
 ├── ai_agent.py      # AIAgent class — Gemini tool-calling, context builder,
-│                    # mock mode fallback
+│                    # mock mode fallback when GOOGLE_API_KEY is absent
 └── tests/
     ├── conftest.py  # In-memory DuckDB fixture, FastAPI dependency override
     └── test_api.py  # 22 integration tests covering all API surface
@@ -483,8 +508,8 @@ backend/
 
 ```
 frontend/src/app/
-├── page.tsx                        # Server component — SSR initial data fetch,
-│                                   # splits SSR_API_URL vs CLIENT_API_URL
+├── page.tsx                        # Server component — SSR initial data fetch
+│                                   # SSR_API_URL vs CLIENT_API_URL split
 ├── DashboardClient.tsx             # Root client component — tab state,
 │                                   # drag-and-drop, task CRUD, pomodoro timer
 ├── globals.css                     # All styles — single file, CSS custom
@@ -492,9 +517,9 @@ frontend/src/app/
 ├── types.ts                        # TypeScript types: Task, User, TaskSlot,
 │                                   # TaskNote, WorkNotification
 └── components/
-    ├── TaskCard.tsx                # Individual task card with data-status attr
+    ├── TaskCard.tsx                # Task card with data-status CSS attribute
     ├── CalendarView.tsx            # Calendar grid + slot scheduling UI
-    ├── CapacityPlanningView.tsx    # Sprint capacity grid with assignment dropdown
+    ├── CapacityPlanningView.tsx    # Sprint × user capacity grid
     ├── InsightsView.tsx            # Burndown / velocity / accuracy charts
     ├── TeamManagementView.tsx      # Team focus + add/edit user forms
     ├── NotesView.tsx               # Published notes catalog + inline editor
@@ -503,7 +528,7 @@ frontend/src/app/
     ├── BlockViewer.tsx             # Read-only block renderer
     ├── AIAgentView.tsx             # Chat UI for AI Agent + summary panel
     ├── ActiveSlotBanner.tsx        # Live countdown banner for active slot
-    ├── TimerComponents.tsx         # Pomodoro timer components
+    ├── TimerComponents.tsx         # Pomodoro timer bar components
     ├── MarkdownRenderer.tsx        # Markdown → HTML renderer
     └── CodeHighlight.tsx           # Prism.js syntax highlight wrapper
 ```
@@ -513,7 +538,7 @@ frontend/src/app/
 #### Tasks
 
 | Method | Path | Description |
-|---|---|---|
+| --- | --- | --- |
 | `GET` | `/tasks` | List all tasks; optional `?status=` filter |
 | `POST` | `/tasks` | Create task |
 | `PUT` | `/tasks/{id}` | Update task (auto-logs activity diff) |
@@ -532,7 +557,7 @@ frontend/src/app/
 #### Notes
 
 | Method | Path | Description |
-|---|---|---|
+| --- | --- | --- |
 | `PUT` | `/notes/{id}` | Update note |
 | `DELETE` | `/notes/{id}` | Delete note |
 | `GET` | `/notes/catalog` | Get all published notes (with task title) |
@@ -540,7 +565,7 @@ frontend/src/app/
 #### Users
 
 | Method | Path | Description |
-|---|---|---|
+| --- | --- | --- |
 | `GET` | `/users` | List active users |
 | `POST` | `/users` | Create user |
 | `PUT` | `/users/{id}` | Update user |
@@ -549,7 +574,7 @@ frontend/src/app/
 #### Scheduling & Slots
 
 | Method | Path | Description |
-|---|---|---|
+| --- | --- | --- |
 | `GET` | `/slots` | List slots; optional `?user_id=` filter |
 | `POST` | `/slots` | Create slot (409 on overlap) |
 | `DELETE` | `/slots/{id}` | Delete slot |
@@ -558,7 +583,7 @@ frontend/src/app/
 #### Aggregates & Analytics
 
 | Method | Path | Description |
-|---|---|---|
+| --- | --- | --- |
 | `GET` | `/team-focus` | Tasks grouped by user (non-done only) |
 | `GET` | `/weekly-closed-tasks` | Done tasks grouped by week |
 | `GET` | `/daily-digest` | Due-soon tasks, today's slots, sprint health |
@@ -570,21 +595,21 @@ frontend/src/app/
 #### Retrospectives
 
 | Method | Path | Description |
-|---|---|---|
+| --- | --- | --- |
 | `GET` | `/retros` | List all retrospectives |
-| `GET` | `/retros/{sprint_id}` | Get (or draft) retro for a sprint |
+| `GET` | `/retros/{sprint_id}` | Get (or auto-draft) retro for a sprint |
 | `POST` | `/retros` | Save/upsert retrospective |
 
 #### Dependencies
 
 | Method | Path | Description |
-|---|---|---|
+| --- | --- | --- |
 | `DELETE` | `/dependencies/{id}` | Remove a dependency |
 
 #### AI Agent
 
 | Method | Path | Description |
-|---|---|---|
+| --- | --- | --- |
 | `POST` | `/ai/summary` | Generate weekly executive summary |
 | `POST` | `/ai/chat` | Natural-language query with tool-calling |
 
