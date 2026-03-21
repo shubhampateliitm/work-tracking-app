@@ -475,7 +475,7 @@ erDiagram
 
 ### Sprint ID Format
 
-```
+```text
 2026-Q1-S6-20260311
   │    │  │    │
   │    │  │    └── YYYYMMDD — Wednesday start date of the sprint
@@ -488,7 +488,7 @@ Week starts on **Wednesday**. A sprint is **2 weeks**. Productive capacity defau
 
 ### Backend Component Map
 
-```
+```text
 backend/
 ├── main.py          # FastAPI app, CORS middleware, startup hook
 ├── database.py      # DuckDB connection factory (get_db generator),
@@ -506,7 +506,7 @@ backend/
 
 ### Frontend Component Map
 
-```
+```text
 frontend/src/app/
 ├── page.tsx                        # Server component — SSR initial data fetch
 │                                   # SSR_API_URL vs CLIENT_API_URL split
@@ -592,7 +592,7 @@ frontend/src/app/
 | `GET` | `/insights/velocity` | Per-sprint completed tasks and hours |
 | `GET` | `/insights/accuracy` | Per-user estimate vs actual accuracy |
 
-#### Retrospectives
+#### Retrospectives API
 
 | Method | Path | Description |
 | --- | --- | --- |
