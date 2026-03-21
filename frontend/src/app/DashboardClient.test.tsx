@@ -1873,4 +1873,55 @@ describe('DashboardClient Component', () => {
       });
     });
   });
+
+  describe('Roadmap Tab', () => {
+    it('renders Roadmap tab in navigation', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: () => Promise.resolve([]) });
+      await act(async () => {
+        render(<DashboardClient initialTasks={[]} initialTeamFocus={{}} initialWeekly={{}} users={mockUsers} apiUrl="http://localhost:8000" />);
+      });
+      expect(screen.getByRole('button', { name: /roadmap/i })).toBeInTheDocument();
+    });
+
+    it('clicking Roadmap tab shows the roadmap heading', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: () => Promise.resolve([]) });
+      await act(async () => {
+        render(<DashboardClient initialTasks={[]} initialTeamFocus={{}} initialWeekly={{}} users={mockUsers} apiUrl="http://localhost:8000" />);
+      });
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: /roadmap/i })); });
+      await waitFor(() => {
+        expect(screen.getByText(/Build Work Orbit from Scratch/i)).toBeInTheDocument();
+      });
+    });
+
+    it('roadmap renders all 13 phases', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: () => Promise.resolve([]) });
+      await act(async () => {
+        render(<DashboardClient initialTasks={[]} initialTeamFocus={{}} initialWeekly={{}} users={mockUsers} apiUrl="http://localhost:8000" />);
+      });
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: /roadmap/i })); });
+      await waitFor(() => {
+        expect(screen.getByText(/Phase 0/i)).toBeInTheDocument();
+        expect(screen.getByText(/Phase 12/i)).toBeInTheDocument();
+      });
+    });
+
+    it('clicking a phase card expands its steps', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: () => Promise.resolve([]) });
+      await act(async () => {
+        render(<DashboardClient initialTasks={[]} initialTeamFocus={{}} initialWeekly={{}} users={mockUsers} apiUrl="http://localhost:8000" />);
+      });
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: /roadmap/i })); });
+      await waitFor(() => expect(screen.getByText(/Phase 0/i)).toBeInTheDocument());
+
+      // Phase 0 details should not be visible before clicking
+      expect(screen.queryByText(/Why this phase/i)).not.toBeInTheDocument();
+
+      // Click to expand Phase 0
+      await act(async () => { fireEvent.click(screen.getAllByRole('button', { name: /expand/i })[0]); });
+      await waitFor(() => {
+        expect(screen.getByText(/Why this phase/i)).toBeInTheDocument();
+      });
+    });
+  });
 });

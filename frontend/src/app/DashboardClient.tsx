@@ -12,6 +12,7 @@ import { CalendarView } from "./components/CalendarView";
 import { AIAgentView } from "./components/AIAgentView";
 import { InsightsView } from "./components/InsightsView";
 import { NotesView } from "./components/NotesView";
+import { RoadmapView } from "./components/RoadmapView";
 
 type Props = {
   initialTasks: Task[];
@@ -347,9 +348,9 @@ export default function DashboardClient({
       <ActiveSlotBanner slots={slots} tasks={tasks} refreshData={refreshAllData} apiUrl={apiUrl} onSlotStart={() => stopTimerAndLogTime()} />
       <div className="tab-nav-wrapper">
         <div className="tab-nav">
-          {['dashboard', 'calendar', 'team', 'capacity', 'insights', 'notes', 'ai'].map(tab => (
+          {['dashboard', 'calendar', 'team', 'capacity', 'insights', 'notes', 'ai', 'roadmap'].map(tab => (
             <button key={tab} className={`tab-btn ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-              {tab === 'ai' ? 'AI Agent' : tab === 'insights' ? 'Insights' : tab === 'notes' ? 'Notes' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab === 'ai' ? 'AI Agent' : tab === 'insights' ? 'Insights' : tab === 'notes' ? 'Notes' : tab === 'roadmap' ? 'Roadmap' : tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
@@ -387,6 +388,8 @@ export default function DashboardClient({
         <NotesView apiUrl={apiUrl} />
       ) : activeTab === 'ai' ? (
         <AIAgentView apiUrl={apiUrl} refreshData={refreshAllData} />
+      ) : activeTab === 'roadmap' ? (
+        <RoadmapView />
       ) : activeTab === 'capacity' ? (
         <CapacityPlanningView tasks={tasks} users={usersList} apiUrl={apiUrl} slots={slots}
           onTaskUpdate={async (taskId, userId, sprint, estimateHours) => {
