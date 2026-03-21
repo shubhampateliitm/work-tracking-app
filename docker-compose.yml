@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend_db:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DB_PATH=/app/data/work_tracker.duckdb
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - INTERNAL_API_URL=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  backend-test:
+    build: ./backend
+    command: python -m pytest tests/ -v
+    environment:
+      - PYTHONUNBUFFERED=1
+    profiles:
+      - test
+
+volumes:
+  backend_db:

@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+duckdb==1.4.0
+pytest
+httpx
+pydantic
+google-generativeai
+python-dotenv
+python-multipart

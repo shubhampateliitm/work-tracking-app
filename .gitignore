@@ -1,0 +1,30 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/tests/__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Database
+backend/work_tracker.duckdb
+backend/work_tracker.duckdb.bak
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Next.js
+frontend/.next/
+frontend/node_modules/
+frontend/out/
+
+# IDE / tooling
+.agent/
+.claude/
+*.DS_Store
+
+# Misc
+test_500.py
+backend/test_put_500.py
