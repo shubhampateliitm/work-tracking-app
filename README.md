@@ -335,24 +335,20 @@ sequenceDiagram
     participant F as FastAPI
     participant D as DuckDB
 
-    rect rgb(30, 40, 60)
-        note over B,D: Initial page load (SSR)
-        B->>N: GET /
-        N->>F: fetch /tasks, /users, /team-focus (INTERNAL_API_URL)
-        F->>D: SQL SELECT
-        D-->>F: rows
-        F-->>N: JSON
-        N-->>B: hydrated HTML + React state
-    end
+    Note over B,D: Initial page load (SSR)
+    B->>N: GET /
+    N->>F: fetch /tasks, /users, /team-focus (INTERNAL_API_URL)
+    F->>D: SQL SELECT
+    D-->>F: rows
+    F-->>N: JSON
+    N-->>B: hydrated HTML + React state
 
-    rect rgb(30, 60, 40)
-        note over B,D: Client-side interactions
-        B->>F: fetch() PUT/POST/DELETE (CLIENT_API_URL)
-        F->>D: SQL write + optional re-query
-        D-->>F: result rows
-        F-->>B: JSON response
-        B->>B: update local React state
-    end
+    Note over B,D: Client-side interactions
+    B->>F: fetch() PUT/POST/DELETE (CLIENT_API_URL)
+    F->>D: SQL write + optional re-query
+    D-->>F: result rows
+    F-->>B: JSON response
+    B->>B: update local React state
 ```
 
 ### Docker Compose Topology
