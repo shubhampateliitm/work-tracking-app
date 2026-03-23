@@ -471,6 +471,7 @@ export const TaskCard = ({
                   onContentChange={setNoteContent}
                   onSave={saveNote}
                   onCancel={() => { setAddingNote(false); setEditingNoteId(null); setNoteTitle(''); setNoteContent(''); }}
+                  apiUrl={apiUrl}
                 />
               ) : (
                 <button className="btn-secondary note-add-btn" onClick={() => setAddingNote(true)}>+ New Note</button>
@@ -487,7 +488,7 @@ export const TaskCard = ({
                   </div>
                   {expandedNoteId === n.id ? (
                     <div className="note-item-body">
-                      <BlockViewer content={n.content} />
+                      <BlockViewer content={n.content} apiUrl={apiUrl} />
                     </div>
                   ) : (
                     <div className="note-item-excerpt">{n.content.split('\n').find(l => l.trim() && !l.startsWith('#')) ?? n.content.slice(0, 100)}</div>

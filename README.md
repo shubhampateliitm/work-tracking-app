@@ -76,10 +76,10 @@ Frontend is live at <http://localhost:3000>.
 
 ---
 
-### Option B — Docker Compose
+### Option B — Docker Compose (Full Stack Out-of-the-Box)
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
 | Service | URL |
@@ -88,7 +88,10 @@ docker compose up --build
 | Backend API | <http://localhost:8000> |
 | API Docs | <http://localhost:8000/docs> |
 
-The database is persisted in a named Docker volume (`backend_db`). Your data survives container restarts.
+**Key Container Features:**
+
+- **Persistent Data**: The database is persisted in a named Docker volume (`backend_db`). Data survives container restarts.
+- **Secure Code Execution**: The backend maps the host's `/var/run/docker.sock` to enable Docker-in-Docker (DooD) capabilities. The "Jupyter-style" code-execution feature inside notes will securely spawn scoped, isolated containers (e.g., Python, Node.js) on your host daemon without complex setup.
 
 #### Run tests inside Docker
 

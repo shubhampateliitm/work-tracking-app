@@ -71,3 +71,14 @@ class TaskNote(BaseModel):
     is_published: bool = False
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+
+class CodeExecutionRequest(BaseModel):
+    language: str
+    code: str
+
+class CodeExecutionResponse(BaseModel):
+    stdout: str
+    stderr: str
+    exit_code: int
+    timed_out: bool
+

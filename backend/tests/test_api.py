@@ -761,3 +761,47 @@ def test_csv_export_import(client, db):
     imp1 = next(t for t in tasks if t["id"] == "imp_t1")
     assert imp1["title"] == "Imported Task"
     assert imp1["priority"] == "p1"
+
+
+def test_execute_python(client, db):
+    """Execute a Python snippet and get stdout back."""
+    resp = client.post("/execute", json={"language": "python", "code": "print('hello world')"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["stdout"].strip() == "hello world"
+    assert data["stderr"] == ""
+    assert data["exit_code"] == 0
+    assert data["timed_out"] is False
+
+
+def test_execute_javascript(client, db):
+    """Execute a JavaScript snippet via Node.js."""
+    resp = client.post("/execute", json={"language": "javascript", "code": "console.log(42)"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["stdout"].strip() == "42"
+    assert data["exit_code"] == 0
+    assert data["timed_out"] is False
+
+
+def test_execute_syntax_error(client, db):
+    """A script with a syntax error should return non-zero exit_code and stderr."""
+    resp = client.post("/execute", json={"language": "python", "code": "def foo(\n"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["exit_code"] != 0
+    assert "SyntaxError" in data["stderr"]
+
+
+def test_execute_timeout(client, db):
+    """An infinite loop should time out."""
+    resp = client.post("/execute", json={"language": "python", "code": "while True: pass"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["timed_out"] is True
+
+
+def test_execute_unsupported_lang(client, db):
+    """Requesting an unsupported language should return 400."""
+    resp = client.post("/execute", json={"language": "scala", "code": "println(1)"})
+    assert resp.status_code == 400

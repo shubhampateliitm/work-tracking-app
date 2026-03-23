@@ -39,7 +39,7 @@ function foldedChildCount(blocks: NoteBlock[], headingIdx: number): number {
 
 const isHeadingType = (t: BlockType) => t === 'h1' || t === 'h2' || t === 'h3';
 
-export function BlockViewer({ content }: { content: string }) {
+export function BlockViewer({ content, apiUrl }: { content: string; apiUrl?: string }) {
   const blocks = markdownToBlocks(content);
   const [folded, setFolded] = useState<Set<string>>(new Set());
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -102,7 +102,7 @@ export function BlockViewer({ content }: { content: string }) {
               {block.type === 'li' && <span className="nb-li-dot">•</span>}
               <div className={`nb-block nb-block--${block.type} nb-block--readonly`}>
                 {block.type === 'code' ? (
-                  <CodeView code={block.text} lang={block.lang} />
+                  <CodeView code={block.text} lang={block.lang} apiUrl={apiUrl} />
                 ) : block.text ? (
                   <TextWithLinks text={block.text} />
                 ) : (

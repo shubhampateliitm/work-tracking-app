@@ -4843,6 +4843,132 @@ h2 {
 .token.inserted     { color: #3fb950; }
 .token.deleted      { color: #f85149; }
 
+/* ========== Code Execution (Jupyter-style Run button + output) ========== */
+
+.nb-code-view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.nb-code-run-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(63, 185, 80, 0.12);
+  border: 1px solid rgba(63, 185, 80, 0.25);
+  border-radius: var(--radius-sm);
+  color: #3fb950;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  margin-left: auto;
+}
+
+.nb-code-run-btn:hover {
+  background: rgba(63, 185, 80, 0.22);
+  border-color: rgba(63, 185, 80, 0.45);
+  box-shadow: 0 0 8px rgba(63, 185, 80, 0.15);
+}
+
+.nb-code-run-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@keyframes nb-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.nb-code-run-btn--running {
+  color: var(--accent-amber);
+  border-color: rgba(255, 166, 87, 0.3);
+  background: rgba(255, 166, 87, 0.08);
+}
+
+.nb-code-run-btn--running::first-letter {
+  display: inline-block;
+  animation: nb-spin 0.8s linear infinite;
+}
+
+/* Execution output area */
+
+.nb-code-output {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: #0a0e14;
+  padding: 0.5rem 0.85rem;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  animation: fadeInUp 0.2s ease;
+}
+
+.nb-code-output--running {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--accent-amber);
+}
+
+.nb-code-output-spinner {
+  display: inline-block;
+  animation: nb-spin 0.8s linear infinite;
+  font-size: 0.85rem;
+}
+
+.nb-code-output--error {
+  background: rgba(248, 81, 73, 0.06);
+}
+
+.nb-code-output-section {
+  margin-bottom: 0.35rem;
+}
+
+.nb-code-output-section:last-child {
+  margin-bottom: 0;
+}
+
+.nb-code-output-section--error {
+  border-top: 1px dashed rgba(248, 81, 73, 0.2);
+  padding-top: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.nb-code-output-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.nb-code-output-timeout .nb-code-output-label {
+  color: var(--accent-amber);
+}
+
+.nb-code-output-pre {
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: #c9d1d9;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.nb-code-output-pre--error {
+  color: #f85149;
+}
+
 /* Image blocks */
 
 .nb-row--image,

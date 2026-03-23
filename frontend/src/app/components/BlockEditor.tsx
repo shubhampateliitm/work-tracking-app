@@ -236,11 +236,12 @@ const SLASH_ITEMS = [
 type Props = {
   initialContent: string;
   onChange: (markdown: string) => void;
+  apiUrl?: string;
 };
 
 export type BlockEditorHandle = { focusFirst: () => void };
 
-export const BlockEditor = forwardRef<BlockEditorHandle, Props>(function BlockEditor({ initialContent, onChange }, ref) {
+export const BlockEditor = forwardRef<BlockEditorHandle, Props>(function BlockEditor({ initialContent, onChange, apiUrl }, ref) {
   const [blocks, setBlocks] = useState<NoteBlock[]>(() => markdownToBlocks(initialContent));
   const [folded, setFolded] = useState<Set<string>>(new Set());
   const [slashMenu, setSlashMenu] = useState<{ blockId: string; filter: string; idx: number } | null>(null);
@@ -528,6 +529,7 @@ export const BlockEditor = forwardRef<BlockEditorHandle, Props>(function BlockEd
                   lang={block.lang}
                   onChange={text => updateCodeBlock(block.id, { text })}
                   onLangChange={lang => updateCodeBlock(block.id, { lang })}
+                  apiUrl={apiUrl}
                 />
               </div>
             </div>

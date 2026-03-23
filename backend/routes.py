@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from fastapi.responses import StreamingResponse
-from models import Task, User, TaskSlot, TimeSpentUpdate, Retrospective, TaskDependency, TaskNote
+from models import Task, User, TaskSlot, TimeSpentUpdate, Retrospective, TaskDependency, TaskNote, CodeExecutionRequest, CodeExecutionResponse
 import duckdb
 from database import get_db
 from typing import List, Optional
@@ -661,4 +661,21 @@ def ai_chat(request: ChatRequest, conn: duckdb.DuckDBPyConnection = Depends(get_
     agent = AIAgent(conn)
     result = agent.ask_question(request.query)
     return result
+
+
+# --- Code Execution ---
+
+@router.post("/execute", response_model=CodeExecutionResponse)
+def execute_code_endpoint(request: CodeExecutionRequest):
+    from code_executor import execute_code, SUPPORTED_LANGUAGES
+    if request.language not in SUPPORTED_LANGUAGES:
+        raise HTTPException(status_code=400, detail=f"Unsupported language: {request.language}. Supported: {', '.join(sorted(SUPPORTED_LANGUAGES))}")
+    result = execute_code(request.language, request.code)
+    return CodeExecutionResponse(
+        stdout=result.stdout,
+        stderr=result.stderr,
+        exit_code=result.exit_code,
+        timed_out=result.timed_out,
+    )
+
 

@@ -10,9 +10,10 @@ type Props = {
   onContentChange: (c: string) => void;
   onSave: () => void;
   onCancel: () => void;
+  apiUrl?: string;
 };
 
-export function NoteEditor({ title, content, onTitleChange, onContentChange, onSave, onCancel }: Props) {
+export function NoteEditor({ title, content, onTitleChange, onContentChange, onSave, onCancel, apiUrl }: Props) {
   const editorRef = useRef<BlockEditorHandle>(null);
   const titleRef = useRef<HTMLInputElement>(null);
 
@@ -51,7 +52,7 @@ export function NoteEditor({ title, content, onTitleChange, onContentChange, onS
 
         {/* Body */}
         <div className="note-modal-body">
-          <BlockEditor ref={editorRef} initialContent={content} onChange={onContentChange} />
+          <BlockEditor ref={editorRef} initialContent={content} onChange={onContentChange} apiUrl={apiUrl} />
         </div>
 
         {/* Footer */}

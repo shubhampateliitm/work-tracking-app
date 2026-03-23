@@ -93,6 +93,7 @@ export function NotesView({ apiUrl }: Props) {
           onContentChange={setDraftContent}
           onSave={saveEdit}
           onCancel={() => setEditingNote(null)}
+          apiUrl={apiUrl}
         />
       )}
 
@@ -123,7 +124,7 @@ export function NotesView({ apiUrl }: Props) {
             </div>
             {expandedId === note.id ? (
               <div className="catalog-note-body">
-                <BlockViewer content={note.content} />
+                <BlockViewer content={note.content} apiUrl={apiUrl} />
               </div>
             ) : (
               <p className="catalog-note-excerpt">
