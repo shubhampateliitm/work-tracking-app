@@ -21,6 +21,7 @@ export const SUPPORTED_LANGS = [
 ];
 
 export const EXECUTABLE_LANGS = new Set(['python', 'javascript', 'bash', 'go', 'typescript']);
+const CODE_EXECUTION_ENABLED = process.env.NEXT_PUBLIC_CODE_EXECUTION_ENABLED !== 'false';
 
 // Map our lang IDs to Prism grammar keys
 const PRISM_LANG: Record<string, string> = {
@@ -51,6 +52,18 @@ function escapeHtml(s: string): string {
 
 type ExecState = 'idle' | 'running' | 'done';
 type ExecResult = { stdout: string; stderr: string; exit_code: number; timed_out: boolean };
+
+async function readExecutionError(res: Response): Promise<string> {
+  try {
+    const body = await res.json();
+    if (body && typeof body.detail === 'string') {
+      return body.detail;
+    }
+    return JSON.stringify(body);
+  } catch {
+    return await res.text();
+  }
+}
 
 function CodeOutput({ result, state }: { result: ExecResult | null; state: ExecState }) {
   if (state === 'idle' && !result) return null;
@@ -103,7 +116,7 @@ export function CodeView({ code, lang, apiUrl }: { code: string; lang?: string; 
   const [execState, setExecState] = useState<ExecState>('idle');
   const [execResult, setExecResult] = useState<ExecResult | null>(null);
   const html = highlight(code, lang);
-  const canExecute = lang && EXECUTABLE_LANGS.has(lang) && apiUrl;
+  const canExecute = CODE_EXECUTION_ENABLED && lang && EXECUTABLE_LANGS.has(lang) && apiUrl;
 
   const runCode = useCallback(async () => {
     if (!canExecute) return;
@@ -118,7 +131,7 @@ export function CodeView({ code, lang, apiUrl }: { code: string; lang?: string; 
       if (res.ok) {
         setExecResult(await res.json());
       } else {
-        setExecResult({ stdout: '', stderr: `HTTP ${res.status}: ${await res.text()}`, exit_code: -1, timed_out: false });
+        setExecResult({ stdout: '', stderr: `HTTP ${res.status}: ${await readExecutionError(res)}`, exit_code: -1, timed_out: false });
       }
     } catch (err) {
       setExecResult({ stdout: '', stderr: `Network error: ${err}`, exit_code: -1, timed_out: false });
@@ -164,7 +177,7 @@ export function CodeBlockEditor({ code, lang, onChange, onLangChange, apiUrl }: 
   const [execState, setExecState] = useState<ExecState>('idle');
   const [execResult, setExecResult] = useState<ExecResult | null>(null);
 
-  const canExecute = lang && EXECUTABLE_LANGS.has(lang) && apiUrl;
+  const canExecute = CODE_EXECUTION_ENABLED && lang && EXECUTABLE_LANGS.has(lang) && apiUrl;
 
   // Keep textarea height in sync with content
   useEffect(() => {
@@ -199,7 +212,7 @@ export function CodeBlockEditor({ code, lang, onChange, onLangChange, apiUrl }: 
       if (res.ok) {
         setExecResult(await res.json());
       } else {
-        setExecResult({ stdout: '', stderr: `HTTP ${res.status}: ${await res.text()}`, exit_code: -1, timed_out: false });
+        setExecResult({ stdout: '', stderr: `HTTP ${res.status}: ${await readExecutionError(res)}`, exit_code: -1, timed_out: false });
       }
     } catch (err) {
       setExecResult({ stdout: '', stderr: `Network error: ${err}`, exit_code: -1, timed_out: false });

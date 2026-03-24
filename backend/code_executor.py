@@ -5,12 +5,15 @@ Executes code snippets in a subprocess with timeout protection.
 Supported: Python, JavaScript (Node.js), Bash, Go, TypeScript.
 """
 
-import subprocess
-import tempfile
 import os
+import subprocess
 from dataclasses import dataclass
 
 TIMEOUT_SECONDS = 30 # Increased to allow for lazy docker pulls
+CODE_EXECUTION_DISABLED_MESSAGE = (
+    "Code execution is disabled for this backend. Set CODE_EXECUTION_ENABLED=true "
+    "and ensure Docker is reachable from the backend runtime to enable it."
+)
 
 # language id → docker command parts
 LANG_CONFIG: dict[str, list[str]] = {
@@ -35,6 +38,11 @@ class ExecutionResult:
     stderr: str
     exit_code: int
     timed_out: bool
+
+
+def code_execution_enabled() -> bool:
+    value = os.getenv("CODE_EXECUTION_ENABLED", "true").strip().lower()
+    return value not in {"0", "false", "no", "off"}
 
 
 def execute_code(language: str, code: str) -> ExecutionResult:
@@ -64,4 +72,11 @@ def execute_code(language: str, code: str) -> ExecutionResult:
             stderr=f"Execution timed out after {TIMEOUT_SECONDS}s",
             exit_code=-1,
             timed_out=True,
+        )
+    except FileNotFoundError:
+        return ExecutionResult(
+            stdout="",
+            stderr="Docker CLI is not available in the backend runtime.",
+            exit_code=-1,
+            timed_out=False,
         )

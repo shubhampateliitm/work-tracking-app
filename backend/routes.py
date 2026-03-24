@@ -667,9 +667,16 @@ def ai_chat(request: ChatRequest, conn: duckdb.DuckDBPyConnection = Depends(get_
 
 @router.post("/execute", response_model=CodeExecutionResponse)
 def execute_code_endpoint(request: CodeExecutionRequest):
-    from code_executor import execute_code, SUPPORTED_LANGUAGES
+    from code_executor import (
+        CODE_EXECUTION_DISABLED_MESSAGE,
+        SUPPORTED_LANGUAGES,
+        code_execution_enabled,
+        execute_code,
+    )
     if request.language not in SUPPORTED_LANGUAGES:
         raise HTTPException(status_code=400, detail=f"Unsupported language: {request.language}. Supported: {', '.join(sorted(SUPPORTED_LANGUAGES))}")
+    if not code_execution_enabled():
+        raise HTTPException(status_code=503, detail=CODE_EXECUTION_DISABLED_MESSAGE)
     result = execute_code(request.language, request.code)
     return CodeExecutionResponse(
         stdout=result.stdout,
@@ -677,5 +684,4 @@ def execute_code_endpoint(request: CodeExecutionRequest):
         exit_code=result.exit_code,
         timed_out=result.timed_out,
     )
-
 

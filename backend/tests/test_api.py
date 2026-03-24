@@ -263,6 +263,14 @@ def test_slot_completion(client, db):
     t = next(t for t in resp.json() if t["id"] == "comp_task")
     assert abs(t["time_spent_mins"] - 30) <= 1
 
+def test_code_execution_disabled_returns_503(client: TestClient, monkeypatch):
+    monkeypatch.setenv("CODE_EXECUTION_ENABLED", "false")
+
+    response = client.post("/execute", json={"language": "python", "code": "print('hi')"})
+
+    assert response.status_code == 503
+    assert "Code execution is disabled" in response.json()["detail"]
+
 
 def test_sprint_field_persistence(client: TestClient):
     """Tasks can be assigned to sprints and the sprint field is persisted."""
@@ -763,8 +771,19 @@ def test_csv_export_import(client, db):
     assert imp1["priority"] == "p1"
 
 
-def test_execute_python(client, db):
+def test_execute_python(client, db, monkeypatch):
     """Execute a Python snippet and get stdout back."""
+    from code_executor import ExecutionResult
+    import code_executor
+
+    monkeypatch.setenv("CODE_EXECUTION_ENABLED", "true")
+    monkeypatch.setattr(code_executor, "execute_code", lambda language, code: ExecutionResult(
+        stdout="hello world\n",
+        stderr="",
+        exit_code=0,
+        timed_out=False,
+    ))
+
     resp = client.post("/execute", json={"language": "python", "code": "print('hello world')"})
     assert resp.status_code == 200
     data = resp.json()
@@ -774,8 +793,19 @@ def test_execute_python(client, db):
     assert data["timed_out"] is False
 
 
-def test_execute_javascript(client, db):
+def test_execute_javascript(client, db, monkeypatch):
     """Execute a JavaScript snippet via Node.js."""
+    from code_executor import ExecutionResult
+    import code_executor
+
+    monkeypatch.setenv("CODE_EXECUTION_ENABLED", "true")
+    monkeypatch.setattr(code_executor, "execute_code", lambda language, code: ExecutionResult(
+        stdout="42\n",
+        stderr="",
+        exit_code=0,
+        timed_out=False,
+    ))
+
     resp = client.post("/execute", json={"language": "javascript", "code": "console.log(42)"})
     assert resp.status_code == 200
     data = resp.json()
@@ -784,8 +814,19 @@ def test_execute_javascript(client, db):
     assert data["timed_out"] is False
 
 
-def test_execute_syntax_error(client, db):
+def test_execute_syntax_error(client, db, monkeypatch):
     """A script with a syntax error should return non-zero exit_code and stderr."""
+    from code_executor import ExecutionResult
+    import code_executor
+
+    monkeypatch.setenv("CODE_EXECUTION_ENABLED", "true")
+    monkeypatch.setattr(code_executor, "execute_code", lambda language, code: ExecutionResult(
+        stdout="",
+        stderr="SyntaxError: invalid syntax",
+        exit_code=1,
+        timed_out=False,
+    ))
+
     resp = client.post("/execute", json={"language": "python", "code": "def foo(\n"})
     assert resp.status_code == 200
     data = resp.json()
@@ -793,8 +834,19 @@ def test_execute_syntax_error(client, db):
     assert "SyntaxError" in data["stderr"]
 
 
-def test_execute_timeout(client, db):
+def test_execute_timeout(client, db, monkeypatch):
     """An infinite loop should time out."""
+    from code_executor import ExecutionResult
+    import code_executor
+
+    monkeypatch.setenv("CODE_EXECUTION_ENABLED", "true")
+    monkeypatch.setattr(code_executor, "execute_code", lambda language, code: ExecutionResult(
+        stdout="",
+        stderr="Execution timed out after 30s",
+        exit_code=-1,
+        timed_out=True,
+    ))
+
     resp = client.post("/execute", json={"language": "python", "code": "while True: pass"})
     assert resp.status_code == 200
     data = resp.json()

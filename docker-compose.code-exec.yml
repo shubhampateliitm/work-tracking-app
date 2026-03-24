@@ -1,0 +1,13 @@
+services:
+  backend:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      CODE_EXECUTION_ENABLED: "true"
+
+  frontend:
+    build:
+      args:
+        NEXT_PUBLIC_CODE_EXECUTION_ENABLED: "true"
+    environment:
+      NEXT_PUBLIC_CODE_EXECUTION_ENABLED: "true"

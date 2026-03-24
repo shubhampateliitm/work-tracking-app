@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     build: ./backend
@@ -7,10 +5,10 @@ services:
       - "8000:8000"
     volumes:
       - backend_db:/app/data
-      - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - PYTHONUNBUFFERED=1
-      - DB_PATH=/app/data/work_tracker.duckdb
+      PYTHONUNBUFFERED: "1"
+      DB_PATH: /app/data/work_tracker.duckdb
+      CODE_EXECUTION_ENABLED: "false"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
       interval: 10s
@@ -22,12 +20,14 @@ services:
     build:
       context: ./frontend
       args:
-        - NEXT_PUBLIC_API_URL=http://localhost:8000
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+        NEXT_PUBLIC_CODE_EXECUTION_ENABLED: "false"
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
-      - INTERNAL_API_URL=http://backend:8000
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      INTERNAL_API_URL: http://backend:8000
+      NEXT_PUBLIC_CODE_EXECUTION_ENABLED: "false"
     depends_on:
       backend:
         condition: service_healthy
@@ -36,7 +36,8 @@ services:
     build: ./backend
     command: python -m pytest tests/ -v
     environment:
-      - PYTHONUNBUFFERED=1
+      PYTHONUNBUFFERED: "1"
+      CODE_EXECUTION_ENABLED: "false"
     profiles:
       - test
 

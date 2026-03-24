@@ -91,12 +91,21 @@ docker compose up -d --build
 **Key Container Features:**
 
 - **Persistent Data**: The database is persisted in a named Docker volume (`backend_db`). Data survives container restarts.
-- **Secure Code Execution**: The backend maps the host's `/var/run/docker.sock` to enable Docker-in-Docker (DooD) capabilities. The "Jupyter-style" code-execution feature inside notes will securely spawn scoped, isolated containers (e.g., Python, Node.js) on your host daemon without complex setup.
+- **Enhanced Isolation Compatible by Default**: The default Compose stack does not mount the host Docker socket, so it works with Docker Desktop enhanced container isolation enabled.
+- **Optional Secure Code Execution**: The "Jupyter-style" code-execution feature inside notes is available through an opt-in Compose override that re-enables the Docker socket mount for the backend.
+
+#### Enable code execution in Docker
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.code-exec.yml up -d --build
+```
+
+If Docker Desktop enhanced container isolation is enabled, Docker may still block the socket mount until the backend image is added to the Docker Desktop allowlist.
 
 #### Run tests inside Docker
 
 ```bash
-docker compose --profile test run --rm backend-test
+docker compose --profile test run --build --rm backend-test
 ```
 
 ---
@@ -293,7 +302,9 @@ When `GOOGLE_API_KEY` is not set, both endpoints respond in mock mode without er
 | --- | --- | --- |
 | `GOOGLE_API_KEY` | No | Enables Gemini AI Agent. Without it, AI routes work in mock mode |
 | `DB_PATH` | No | Path to the DuckDB file. Defaults to `work_tracker.duckdb` in the working directory. Set automatically by Docker Compose to `/app/data/work_tracker.duckdb` |
+| `CODE_EXECUTION_ENABLED` | No | Enables Docker-backed code execution in the backend. Defaults to `true` outside Docker, and is set to `false` in the default Compose stack |
 | `NEXT_PUBLIC_API_URL` | No | Browser-facing API base URL. Defaults to `http://localhost:8000` |
+| `NEXT_PUBLIC_CODE_EXECUTION_ENABLED` | No | Controls whether note code blocks show the Run button in the frontend. Set to `false` in the default Compose stack |
 | `INTERNAL_API_URL` | No | Container-internal API URL for Next.js SSR. Set to `http://backend:8000` by Docker Compose |
 
 ---
